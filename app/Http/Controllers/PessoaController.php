@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Service\CalculadoraImc;
 use App\Models\Service\MensageiroRabbitMQ;
 use App\Models\Service\PessoaService;
+use App\Models\Service\RetornoDeErros;
 use Illuminate\Http\Request;
 
 class PessoaController
@@ -25,7 +26,7 @@ class PessoaController
             $pessoas = $this->service->listarPessoas();
             return response()->json($pessoas, 200);
         } catch (\Exception $e) {
-            return response()->json("Não foi possível listar as pessoas.", 500);
+            return RetornoDeErros::lidarComErro($e, "Não foi possível listar as pessoas.");
         }
     }
 
@@ -36,11 +37,10 @@ class PessoaController
             if ($msgErro) {
                 return response()->json($msgErro, 200);
             }
-
             $pessoa = $this->service->cadastrarPessoa($request->all());
             return response()->json("Cadastro da pessoa {$pessoa->nome}", 200);
         } catch (\Exception $e) {
-            return response()->json("Não foi possível cadastrar pessoa.", 500);
+            return RetornoDeErros::lidarComErro($e, "Não foi possível cadastrar pessoa.");
         }
     }
 
@@ -50,7 +50,7 @@ class PessoaController
             $pessoa = $this->service->buscarPessoaPorId($id);
             return response()->json($pessoa, 200);
         } catch (\Exception $e) {
-            return response()->json("Não foi possível buscar pessoa por ID.", 500);
+            return RetornoDeErros::lidarComErro($e, "Não foi possível buscar pessoa por ID.");
         }
     }
 
@@ -65,7 +65,7 @@ class PessoaController
             $pessoa = $this->service->atualizarPessoa($id, $request->all());
             return response()->json("Edição da pessoa {$pessoa->nome}", 200);
         } catch (\Exception $e) {
-            return response()->json("Não foi possível atualizar pessoa.", 500);
+            return RetornoDeErros::lidarComErro($e, "Não foi possível atualizar pessoa.");
         }
     }
 
@@ -75,7 +75,7 @@ class PessoaController
             $pessoaExcluida = $this->service->deletarPessoa($id);
             return response()->json("Exclusão da pessoa {$pessoaExcluida->nome}", 200);
         } catch (\Exception $e) {
-            return response()->json("Não foi possível excluir pessoa.", 500);
+            return RetornoDeErros::lidarComErro($e, "Não foi possível excluir pessoa.");
         }
     }
 }
