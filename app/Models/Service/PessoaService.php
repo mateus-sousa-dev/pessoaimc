@@ -3,8 +3,10 @@
 namespace App\Models\Service;
 
 use App\Interfaces\Mensageiro;
+use App\Models\Entity\Pessoa;
 use App\Models\Repository\PessoaRepository;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Contracts\Validation\Validator as ValidatorErrors;
+use Illuminate\Database\Eloquent\Collection;
 
 class PessoaService
 {
@@ -19,12 +21,12 @@ class PessoaService
         $this->calculadoraImc = $calculadoraImc;
     }
 
-    public function listarPessoas()
+    public function listarPessoas(): Collection
     {
         return $this->repository->listarPessoas();
     }
 
-    public function cadastrarPessoa($arrDados)
+    public function cadastrarPessoa(array $arrDados): Pessoa
     {
         $arrDados['imc'] = $this->calculadoraImc->calcular($arrDados['altura'], $arrDados['peso']);
 
@@ -36,7 +38,7 @@ class PessoaService
         return $pessoa;
     }
 
-    public function atualizarPessoa($id, $arrDados)
+    public function atualizarPessoa(string $id, array $arrDados): Pessoa
     {
         $arrDados['imc'] = $this->calculadoraImc->calcular($arrDados['altura'], $arrDados['peso']);
 
@@ -48,47 +50,12 @@ class PessoaService
         return $pessoa;
     }
 
-    public function validarDadosCadastro($arrDados)
-    {
-        $msgErro = $this->validarDadosForm($arrDados);
-
-        if ($this->repository->verificarExistenciaDePessoaPorNome($arrDados['nome'])) {
-            $msgErro[] = "Nome de pessoa já cadastrado.";
-        }
-
-        return $msgErro;
-    }
-
-    public function validarDadosEdicao($arrDados)
-    {
-        return $this->validarDadosForm($arrDados);
-    }
-
-    private function validarDadosForm($arrDados)
-    {
-        $validator = Validator::make($arrDados,[
-            'nome' => ['required', 'max:150'],
-            'sexo' => ['required', 'max:1'],
-            'peso' => ['required', 'max:3'],
-            'altura' => ['required', 'max:4']
-        ],
-        [
-            'nome.unique' => "Nome ja existe"
-        ]);
-        $msgErro = [];
-        if ($validator->fails()) {
-            $msgErro = $this->mapeiaErrosValidator($validator);
-        }
-
-        return $msgErro;
-    }
-
-    public function buscarPessoaPorId($id)
+    public function buscarPessoaPorId(string $id): Pessoa
     {
         return $this->repository->buscarPessoaPorId($id);
     }
 
-    public function deletarPessoa($id)
+    public function deletarPessoa(string $id): Pessoa
     {
         $pessoaExcluida = $this->repository->deletarPessoa($id);
         $this->mensageiro->defineMensagem("Exclusão da pessoa {$pessoaExcluida->nome}");
@@ -97,7 +64,7 @@ class PessoaService
         return $pessoaExcluida;
     }
 
-    private function mapeiaErrosValidator($validator)
+    private function mapeiaErrosValidator(ValidatorErrors $validator): ?array
     {
         foreach ($validator->errors()->messages() as $messageError) {
             $msgErro[] = $messageError[array_key_first($messageError)];

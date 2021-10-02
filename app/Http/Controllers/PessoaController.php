@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Service\CalculadoraImc;
-use App\Models\Service\MensageiroRabbitMQ;
-use App\Models\Service\PessoaService;
-use App\Models\Service\RetornoDeErros;
+use App\Http\Requests\PessoaFormRequest;
+use App\Models\Service\{CalculadoraImc, MensageiroRabbitMQ, PessoaService, RetornoDeErros};
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PessoaController
@@ -20,7 +19,7 @@ class PessoaController
         );
     }
 
-    public function index()
+    public function index(): JsonResponse
     {
         try {
             $pessoas = $this->service->listarPessoas();
@@ -30,13 +29,9 @@ class PessoaController
         }
     }
 
-    public function store(Request $request)
+    public function store(PessoaFormRequest $request): JsonResponse
     {
         try {
-            $msgErro = $this->service->validarDadosCadastro($request->all());
-            if ($msgErro) {
-                return response()->json($msgErro, 200);
-            }
             $pessoa = $this->service->cadastrarPessoa($request->all());
             return response()->json("Cadastro da pessoa {$pessoa->nome}", 200);
         } catch (\Exception $e) {
@@ -44,7 +39,7 @@ class PessoaController
         }
     }
 
-    public function show($id)
+    public function show(string $id): JsonResponse
     {
         try {
             $pessoa = $this->service->buscarPessoaPorId($id);
@@ -54,14 +49,9 @@ class PessoaController
         }
     }
 
-    public function update($id, Request $request)
+    public function update(string $id, Request $request): JsonResponse
     {
         try {
-            $msgErro = $this->service->validarDadosEdicao($request->all());
-            if ($msgErro) {
-                return response()->json($msgErro, 200);
-            }
-
             $pessoa = $this->service->atualizarPessoa($id, $request->all());
             return response()->json("Edição da pessoa {$pessoa->nome}", 200);
         } catch (\Exception $e) {
@@ -69,7 +59,7 @@ class PessoaController
         }
     }
 
-    public function destroy($id)
+    public function destroy(string $id): JsonResponse
     {
         try {
             $pessoaExcluida = $this->service->deletarPessoa($id);
