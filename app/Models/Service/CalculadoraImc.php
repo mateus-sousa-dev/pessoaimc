@@ -8,6 +8,6 @@ class CalculadoraImc
 {
     public function calcular($altura, $peso)
     {
-        return $peso / ($altura ** 2);
+        return round($peso / ($altura ** 2), 2);
     }
 }

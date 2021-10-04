@@ -9,9 +9,4 @@ class Pessoa extends Model
     protected $connection = 'mongodb';
     protected $collection = "pessoas";
     public $timestamps = false;
-
-    public function getImcAttribute($imc)
-    {
-        return round($imc, 2);
-    }
 }
