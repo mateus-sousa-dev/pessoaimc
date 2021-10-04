@@ -1,0 +1,32 @@
+version: '3.1'
+
+services:
+  php:
+    image: mateus/pessoaimc
+    environment:
+      APP_URL: http://localhost:80
+      QUEUE_CONNECTION: rabbitmq
+      RABBITMQ_HOST:
+      RABBITMQ_PORT:
+      RABBITMQ_USER:
+      RABBITMQ_PASSWORD:
+      RABBITMQ_VHOST:
+      DB_URI: mongodb://root:example@db:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false
+    networks:
+      - banco
+    ports:
+      - 80:80
+    depends_on:
+      - db
+  db:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - banco
+    ports:
+      - 3000:27017
+networks:
+  banco:
